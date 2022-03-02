@@ -2,6 +2,7 @@ import torch
 import time
 import torch.nn as nn
 
+
 class PrimedBackpropper(object):
     def __init__(self, initial, final, initial_num_images):
         self.initial = initial
@@ -13,18 +14,23 @@ class PrimedBackpropper(object):
         self.num_trained += partition_size
 
     def get_backpropper(self):
-        return self.initial if self.num_trained < self.initial_num_images else self.final
+        return (
+            self.initial if self.num_trained < self.initial_num_images else self.final
+        )
 
     @property
     def optimizer(self):
-        return self.initial.optimizer if self.num_trained < self.initial_num_images else self.final.optimizer
+        return (
+            self.initial.optimizer
+            if self.num_trained < self.initial_num_images
+            else self.final.optimizer
+        )
 
     def backward_pass(self, *args, **kwargs):
         return self.get_backpropper().backward_pass(*args, **kwargs)
 
 
 class SamplingBackpropper(object):
-
     def __init__(self, device, net, optimizer, loss_fn):
         self.optimizer = optimizer
         self.net = net
@@ -50,14 +56,16 @@ class SamplingBackpropper(object):
         targets = self._get_chosen_targets_tensor(chosen_batch).to(self.device)
 
         # Run forward pass
-        outputs = self.net(data) 
+        outputs = self.net(data)
         losses = self.loss_fn(reduce=False)(outputs, targets)
-        softmax_outputs = nn.Softmax()(outputs)             # OPT: not necessary when logging is off
+        softmax_outputs = nn.Softmax()(
+            outputs
+        )  # OPT: not necessary when logging is off
         _, predicted = outputs.max(1)
         is_corrects = predicted.eq(targets)
 
         # Scale each loss by image-specific select probs
-        #losses = torch.div(losses, probabilities.to(self.device))
+        # losses = torch.div(losses, probabilities.to(self.device))
 
         # Reduce loss
         loss = losses.mean()
@@ -68,25 +76,22 @@ class SamplingBackpropper(object):
         self.optimizer.step()
 
         # Add for logging selected loss
-        for em, loss, is_correct in zip(chosen_batch,
-                                        losses,
-                                        is_corrects):
+        for em, loss, is_correct in zip(chosen_batch, losses, is_corrects):
             em.example.loss = loss.item()
             em.example.correct = is_correct.item()
             em.metadata["loss"] = em.example.loss
 
         return batch
 
-class ReweightedBackpropper(SamplingBackpropper):
 
+class ReweightedBackpropper(SamplingBackpropper):
     def __init__(self, device, net, optimizer, loss_fn):
-        super(ReweightedBackpropper, self).__init__(device,
-                                                    net,
-                                                    optimizer,
-                                                    loss_fn)
+        super(ReweightedBackpropper, self).__init__(device, net, optimizer, loss_fn)
 
     def _get_chosen_weights_tensor(self, batch):
-        chosen_weights = [torch.tensor(em.example.weight, dtype=torch.float) for em in batch]
+        chosen_weights = [
+            torch.tensor(em.example.weight, dtype=torch.float) for em in batch
+        ]
         return torch.stack(chosen_weights)
 
     def backward_pass(self, batch):
@@ -98,9 +103,11 @@ class ReweightedBackpropper(SamplingBackpropper):
         weights = self._get_chosen_weights_tensor(chosen_batch).to(self.device)
 
         # Run forward pass
-        outputs = self.net(data) 
+        outputs = self.net(data)
         losses = self.loss_fn(reduce=False)(outputs, targets)
-        softmax_outputs = nn.Softmax()(outputs)             # OPT: not necessary when logging is off
+        softmax_outputs = nn.Softmax()(
+            outputs
+        )  # OPT: not necessary when logging is off
         _, predicted = outputs.max(1)
         is_corrects = predicted.eq(targets)
 
@@ -116,23 +123,17 @@ class ReweightedBackpropper(SamplingBackpropper):
         self.optimizer.step()
 
         # Add for logging selected loss
-        for em, loss, is_correct in zip(chosen_batch,
-                                        losses,
-                                        is_corrects):
+        for em, loss, is_correct in zip(chosen_batch, losses, is_corrects):
             em.example.loss = loss.item()
             em.example.correct = is_correct.item()
             em.metadata["loss"] = em.example.loss
 
         return batch
 
-class AlwaysOnBackpropper(object):
 
+class AlwaysOnBackpropper(object):
     def __init__(self, device, net, optimizer, loss_fn):
-        super(SamplingBackpropper, self).__init__(device,
-                                                  net,
-                                                  optimizer,
-                                                  loss_fn)
+        super(SamplingBackpropper, self).__init__(device, net, optimizer, loss_fn)
 
     def _get_chosen_examples(self, batch):
         return batch
-

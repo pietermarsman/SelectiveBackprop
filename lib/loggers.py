@@ -35,7 +35,7 @@ class ImageWriter(object):
             img_id = elem[2]
             img_file = os.path.join(self.output_dir, "image-{}.png".format(img_id))
 
-            img.save(img_file, 'PNG')
+            img.save(img_file, "PNG")
 
 
 class ProbabilityByImageLogger(object):
@@ -55,19 +55,25 @@ class ProbabilityByImageLogger(object):
     def init_data(self):
         # Store frequency of each image getting backpropped
         data_pickle_dir = os.path.join(self.pickle_dir, "probabilities_by_image")
-        self.probabilities_pickle_file = os.path.join(data_pickle_dir,
-                                                      "{}_probabilities".format(self.pickle_prefix))
-        self.backward_selects_pickle_file = os.path.join(data_pickle_dir,
-                                                "{}_selects".format(self.pickle_prefix))
-        self.forward_selects_pickle_file = os.path.join(data_pickle_dir,
-                                                "{}_forwardselects".format(self.pickle_prefix))
-        self.losses_pickle_file = os.path.join(data_pickle_dir,
-                                               "{}_losses".format(self.pickle_prefix))
+        self.probabilities_pickle_file = os.path.join(
+            data_pickle_dir, "{}_probabilities".format(self.pickle_prefix)
+        )
+        self.backward_selects_pickle_file = os.path.join(
+            data_pickle_dir, "{}_selects".format(self.pickle_prefix)
+        )
+        self.forward_selects_pickle_file = os.path.join(
+            data_pickle_dir, "{}_forwardselects".format(self.pickle_prefix)
+        )
+        self.losses_pickle_file = os.path.join(
+            data_pickle_dir, "{}_losses".format(self.pickle_prefix)
+        )
         # Make images hist pickle path
         if not os.path.exists(data_pickle_dir):
             os.mkdir(data_pickle_dir)
 
-    def update_data(self, image_ids, probabilities, backward_selects, forward_selects, losses):
+    def update_data(
+        self, image_ids, probabilities, backward_selects, forward_selects, losses
+    ):
         for image_id, probability in zip(image_ids, probabilities):
             if image_id not in self.probabilities.keys():
                 if self.max_num_images:
@@ -124,7 +130,6 @@ class ProbabilityByImageLogger(object):
 
 
 class ImageIdHistLogger(object):
-
     def __init__(self, pickle_dir, pickle_prefix, num_images, log_interval):
         self.current_epoch = 0
         self.pickle_dir = pickle_dir
@@ -141,8 +146,9 @@ class ImageIdHistLogger(object):
         keys = range(num_images)
         self.data = dict(zip(keys, [0] * len(keys)))
         data_pickle_dir = os.path.join(self.pickle_dir, "image_id_hist")
-        self.data_pickle_file = os.path.join(data_pickle_dir,
-                                                 "{}_images_hist".format(self.pickle_prefix))
+        self.data_pickle_file = os.path.join(
+            data_pickle_dir, "{}_images_hist".format(self.pickle_prefix)
+        )
         # Make images hist pickle path
         if not os.path.exists(data_pickle_dir):
             os.mkdir(data_pickle_dir)
@@ -161,8 +167,9 @@ class ImageIdHistLogger(object):
             print(latest_file)
             pickle.dump(self.data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        epoch_file = "{}.epoch_{}.pickle".format(self.data_pickle_file,
-                                                 self.current_epoch)
+        epoch_file = "{}.epoch_{}.pickle".format(
+            self.data_pickle_file, self.current_epoch
+        )
         if self.current_epoch % self.log_interval == 0:
             with open(epoch_file, "wb") as handle:
                 print(epoch_file)
@@ -170,7 +177,6 @@ class ImageIdHistLogger(object):
 
 
 class LossesByEpochLogger(object):
-
     def __init__(self, pickle_dir, pickle_prefix, log_frequency):
         self.current_epoch = 0
         self.pickle_dir = pickle_dir
@@ -187,8 +193,9 @@ class LossesByEpochLogger(object):
         # Store frequency of each image getting backpropped
         self.data = []
         data_pickle_dir = os.path.join(self.pickle_dir, "losses")
-        self.data_pickle_file = os.path.join(data_pickle_dir,
-                                                 "{}_losses".format(self.pickle_prefix))
+        self.data_pickle_file = os.path.join(
+            data_pickle_dir, "{}_losses".format(self.pickle_prefix)
+        )
         # Make images hist pickle path
         if not os.path.exists(data_pickle_dir):
             os.mkdir(data_pickle_dir)
@@ -201,8 +208,9 @@ class LossesByEpochLogger(object):
         self.update_data(losses)
 
     def write(self):
-        epoch_file = "{}.epoch_{}.pickle".format(self.data_pickle_file,
-                                                 self.current_epoch)
+        epoch_file = "{}.epoch_{}.pickle".format(
+            self.data_pickle_file, self.current_epoch
+        )
         if self.current_epoch % self.log_frequency == 0:
             with open(epoch_file, "wb") as handle:
                 print(epoch_file)
@@ -223,8 +231,9 @@ class LossesByImageLogger(object):
     def init_data(self):
         # Store frequency of each image getting backpropped
         data_pickle_dir = os.path.join(self.pickle_dir, "losses_by_image")
-        self.data_pickle_file = os.path.join(data_pickle_dir,
-                                             "{}_losses".format(self.pickle_prefix))
+        self.data_pickle_file = os.path.join(
+            data_pickle_dir, "{}_losses".format(self.pickle_prefix)
+        )
         # Make images hist pickle path
         if not os.path.exists(data_pickle_dir):
             os.mkdir(data_pickle_dir)
@@ -264,8 +273,9 @@ class VariancesByImageLogger(object):
     def init_data(self):
         # Store frequency of each image getting backpropped
         data_pickle_dir = os.path.join(self.pickle_dir, "variance_by_image")
-        self.data_pickle_file = os.path.join(data_pickle_dir,
-                                             "{}_variances".format(self.pickle_prefix))
+        self.data_pickle_file = os.path.join(
+            data_pickle_dir, "{}_variances".format(self.pickle_prefix)
+        )
         # Make images hist pickle path
         if not os.path.exists(data_pickle_dir):
             os.mkdir(data_pickle_dir)
@@ -293,6 +303,7 @@ class VariancesByImageLogger(object):
             print(latest_file)
             pickle.dump(variance, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+
 class VariancesByEpochLogger(object):
     def __init__(self, pickle_dir, pickle_prefix, log_frequency):
         self.current_epoch = 0
@@ -310,8 +321,9 @@ class VariancesByEpochLogger(object):
         # Store frequency of each image getting backpropped
         self.data = []
         data_pickle_dir = os.path.join(self.pickle_dir, "variance_by_epoch")
-        self.data_pickle_file = os.path.join(data_pickle_dir,
-                                                 "{}_variances".format(self.pickle_prefix))
+        self.data_pickle_file = os.path.join(
+            data_pickle_dir, "{}_variances".format(self.pickle_prefix)
+        )
         # Make images hist pickle path
         if not os.path.exists(data_pickle_dir):
             os.mkdir(data_pickle_dir)
@@ -325,12 +337,14 @@ class VariancesByEpochLogger(object):
         self.update_data(variance)
 
     def write(self):
-        epoch_file = "{}.epoch_{}.pickle".format(self.data_pickle_file,
-                                                 self.current_epoch)
+        epoch_file = "{}.epoch_{}.pickle".format(
+            self.data_pickle_file, self.current_epoch
+        )
         if self.current_epoch % self.log_frequency == 0:
             with open(epoch_file, "wb") as handle:
                 print(epoch_file)
                 pickle.dump(self.data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 class VariancesByAverageProbabilityByImageLogger(object):
     def __init__(self, pickle_dir, pickle_prefix, max_num_images=None):
@@ -346,8 +360,9 @@ class VariancesByAverageProbabilityByImageLogger(object):
     def init_data(self):
         # Store frequency of each image getting backpropped
         data_pickle_dir = os.path.join(self.pickle_dir, "variance_by_avg_prob")
-        self.data_pickle_file = os.path.join(data_pickle_dir,
-                                             "{}_variances".format(self.pickle_prefix))
+        self.data_pickle_file = os.path.join(
+            data_pickle_dir, "{}_variances".format(self.pickle_prefix)
+        )
         # Make images hist pickle path
         if not os.path.exists(data_pickle_dir):
             os.mkdir(data_pickle_dir)
@@ -380,9 +395,18 @@ class VariancesByAverageProbabilityByImageLogger(object):
             print(latest_file)
             pickle.dump(out, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-class Logger(object):
 
-    def __init__(self, log_interval=1, epoch=0, num_backpropped=0, num_skipped=0, num_skipped_fp=0, num_forwards=0, start_time_seconds=None):
+class Logger(object):
+    def __init__(
+        self,
+        log_interval=1,
+        epoch=0,
+        num_backpropped=0,
+        num_skipped=0,
+        num_skipped_fp=0,
+        num_forwards=0,
+        start_time_seconds=None,
+    ):
         self.current_epoch = epoch
         self.current_batch = 0
         self.log_interval = log_interval
@@ -390,7 +414,7 @@ class Logger(object):
         self.global_num_backpropped = num_backpropped
         self.global_num_skipped = num_skipped
         self.global_num_skipped_fp = num_skipped_fp
-        self.global_num_forwards= num_forwards
+        self.global_num_forwards = num_forwards
 
         self.partition_loss = 0
         self.partition_backpropped_loss = 0
@@ -422,11 +446,11 @@ class Logger(object):
 
     @property
     def partition_accuracy(self):
-        return 100. * self.partition_num_correct / self.partition_seen
+        return 100.0 * self.partition_num_correct / self.partition_seen
 
     @property
     def train_debug(self):
-        return 'train_debug,{},{},{},{},{:.6f},{},{:.6f},{:4f}'.format(
+        return "train_debug,{},{},{},{},{:.6f},{},{:.6f},{:4f}".format(
             self.current_epoch,
             self.global_num_backpropped,
             self.global_num_skipped,
@@ -434,7 +458,8 @@ class Logger(object):
             self.average_partition_backpropped_loss,
             self.global_num_forwards,
             self.partition_accuracy,
-            time.time() - self.start_time_seconds)
+            time.time() - self.start_time_seconds,
+        )
 
     def next_partition(self):
         self.partition_loss = 0
@@ -448,7 +473,9 @@ class Logger(object):
         # self.partition_loss += sum([example.loss for em in batch])
         num_skipped_fp = sum([int(not em.example.forward_select) for em in batch])
         self.global_num_skipped_fp += num_skipped_fp
-        self.global_num_forwards += sum([int(em.example.forward_select) for em in batch])
+        self.global_num_forwards += sum(
+            [int(em.example.forward_select) for em in batch]
+        )
 
     def handle_backward_batch(self, batch):
 
@@ -462,16 +489,20 @@ class Logger(object):
         if self.debug:
             self.partition_num_backpropped += num_backpropped
             self.partition_num_skipped += num_skipped
-            self.partition_backpropped_loss += sum([em.example.backpropped_loss
-                                                    for em in batch
-                                                    if em.example.backpropped_loss])
+            self.partition_backpropped_loss += sum(
+                [
+                    em.example.backpropped_loss
+                    for em in batch
+                    if em.example.backpropped_loss
+                ]
+            )
             chosen = [em for em in batch if em.example.select]
-            self.partition_num_correct += sum([1 for em in chosen if em.example.correct])
+            self.partition_num_correct += sum(
+                [1 for em in chosen if em.example.correct]
+            )
 
             self.write()
 
     def write(self):
         if self.current_batch % self.log_interval == 0:
             print(self.train_debug)
-
-

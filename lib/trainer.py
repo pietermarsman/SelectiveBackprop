@@ -11,16 +11,19 @@ class ExampleAndMetadata(object):
         self.example = example
         self.metadata = metadata
 
+
 class Example(object):
     # TODO: Add ExampleCollection class
-    def __init__(self,
-                 loss=None,
-                 output=None,
-                 softmax_output=None,
-                 target=None,
-                 datum=None,
-                 image_id=None,
-                 select_probability=None):
+    def __init__(
+        self,
+        loss=None,
+        output=None,
+        softmax_output=None,
+        target=None,
+        datum=None,
+        image_id=None,
+        select_probability=None,
+    ):
         if loss is not None:
             self.loss = loss.detach().cpu()
         if output is not None:
@@ -32,22 +35,20 @@ class Example(object):
         self.datum = datum.detach().cpu()
         self.image_id = image_id
         self.select_probability = select_probability
-        self.backpropped_loss = None   # Populated after backprop
+        self.backpropped_loss = None  # Populated after backprop
 
     def __str__(self):
-        string = "Image {}\n\ndatum:{}\ntarget:{}\nsp:{}\n".format(self.image_id,
-                                                                   self.datum,
-                                                                   self.target,
-                                                                   self.select_probability)
-        if hasattr(self, 'loss'):
+        string = "Image {}\n\ndatum:{}\ntarget:{}\nsp:{}\n".format(
+            self.image_id, self.datum, self.target, self.select_probability
+        )
+        if hasattr(self, "loss"):
             string += "loss:{}\n".format(self.loss)
-        if hasattr(self, 'output'):
+        if hasattr(self, "output"):
             string += "output:{}\n".format(self.output)
-        if hasattr(self, 'softmax_output'):
+        if hasattr(self, "softmax_output"):
             string += "softmax_output:{}\n".format(self.softmax_output)
 
         return string
-
 
     @property
     def predicted(self):
@@ -60,16 +61,18 @@ class Example(object):
 
 
 class Trainer(object):
-    def __init__(self,
-                 device,
-                 net,
-                 selector,
-                 backpropper,
-                 batch_size,
-                 loss_fn,
-                 max_num_backprops=float('inf'),
-                 lr_schedule=None,
-                 forwardlr=False):
+    def __init__(
+        self,
+        device,
+        net,
+        selector,
+        backpropper,
+        batch_size,
+        loss_fn,
+        max_num_backprops=float("inf"),
+        lr_schedule=None,
+        forwardlr=False,
+    ):
         self.device = device
         self.net = net
         self.selector = selector
@@ -96,7 +99,9 @@ class Trainer(object):
         self.global_num_backpropped += sum([1 for em in batch if em.example.select])
 
     def update_num_forwards(self, batch):
-        self.global_num_forwards += sum([1 for em in batch if em.example.forward_select])
+        self.global_num_forwards += sum(
+            [1 for em in batch if em.example.forward_select]
+        )
 
     def update_num_analyzed(self, batch):
         self.global_num_analyzed += len(batch)
@@ -124,10 +129,13 @@ class Trainer(object):
             self.lr_schedule[int(k)] = data[k]
 
     def set_learning_rate(self, lr):
-        print("Setting learning rate to {} at {} backprops".format(lr,
-                                                                   self.global_num_backpropped))
+        print(
+            "Setting learning rate to {} at {} backprops".format(
+                lr, self.global_num_backpropped
+            )
+        )
         for param_group in self.backpropper.optimizer.param_groups:
-            param_group['lr'] = lr
+            param_group["lr"] = lr
 
     @property
     def counter(self):
@@ -141,7 +149,7 @@ class Trainer(object):
         for start_num_backprop in reversed(sorted(self.lr_schedule)):
             lr = self.lr_schedule[start_num_backprop]
             if self.counter >= start_num_backprop:
-                if self.backpropper.optimizer.param_groups[0]['lr'] is not lr:
+                if self.backpropper.optimizer.param_groups[0]["lr"] is not lr:
                     self.set_learning_rate(lr)
                 break
 
@@ -151,7 +159,8 @@ class Trainer(object):
 
     def train(self, trainloader):
         for i, batch in enumerate(trainloader):
-            if self.stopped: break
+            if self.stopped:
+                break
             if i == len(trainloader) - 1:
                 self.train_batch(batch, final=True)
             else:
@@ -169,12 +178,14 @@ class Trainer(object):
             num_images_to_backprop += int(em.example.select)
             if num_images_to_backprop == self.batch_size:
                 # Note: includes item that should and shouldn't be backpropped
-                backprop_batch = self.backprop_queue[:index+1]
-                self.backprop_queue = self.backprop_queue[index+1:]
+                backprop_batch = self.backprop_queue[: index + 1]
+                self.backprop_queue = self.backprop_queue[index + 1 :]
                 return backprop_batch
         if final:
+
             def get_num_to_backprop(batch):
                 return sum([1 for em in batch if em.example.select])
+
             backprop_batch = self.backprop_queue
             self.backprop_queue = []
             if get_num_to_backprop(backprop_batch) == 0:
@@ -188,40 +199,45 @@ class Trainer(object):
             image_id = image_id.item()
             if image_id not in self.example_metadata:
                 self.example_metadata[image_id] = {"epochs_since_update": 0}
-            example = Example(target=target, datum=datum, image_id=image_id, select_probability=1)
+            example = Example(
+                target=target, datum=datum, image_id=image_id, select_probability=1
+            )
             example.select = True
             batch.append(ExampleAndMetadata(example, self.example_metadata[image_id]))
         return batch
 
-class MemoizedTrainer(Trainer):
-    def __init__(self,
-                 device,
-                 net,
-                 selector,
-                 fp_selector,
-                 backpropper,
-                 batch_size,
-                 loss_fn,
-                 max_num_backprops=float('inf'),
-                 lr_schedule=None,
-                 forwardlr=False):
 
-        super(MemoizedTrainer, self).__init__(device,
-                                net,
-                                selector,
-                                backpropper,
-                                batch_size,
-                                loss_fn,
-                                max_num_backprops,
-                                lr_schedule,
-                                forwardlr)
+class MemoizedTrainer(Trainer):
+    def __init__(
+        self,
+        device,
+        net,
+        selector,
+        fp_selector,
+        backpropper,
+        batch_size,
+        loss_fn,
+        max_num_backprops=float("inf"),
+        lr_schedule=None,
+        forwardlr=False,
+    ):
+
+        super(MemoizedTrainer, self).__init__(
+            device,
+            net,
+            selector,
+            backpropper,
+            batch_size,
+            loss_fn,
+            max_num_backprops,
+            lr_schedule,
+            forwardlr,
+        )
 
         self.fp_selector = fp_selector
         self.forward_queue = []
         self.forward_batch_size = batch_size
-        self.forwardpropper = forwardproppers.CutoutForwardpropper(device,
-                                                                   net,
-                                                                   loss_fn)
+        self.forwardpropper = forwardproppers.CutoutForwardpropper(device, net, loss_fn)
 
     def train_batch(self, batch, final):
         EMs = self.create_example_batch(*batch)
@@ -235,7 +251,9 @@ class MemoizedTrainer(Trainer):
             self.backprop_queue += annotated_forward_batch
             backprop_batch = self.get_batch(final)
             if backprop_batch:
-                annotated_backward_batch = self.backpropper.backward_pass(backprop_batch)
+                annotated_backward_batch = self.backpropper.backward_pass(
+                    backprop_batch
+                )
                 self.emit_backward_pass(annotated_backward_batch)
 
     def get_forward_batch(self, final):
@@ -245,8 +263,8 @@ class MemoizedTrainer(Trainer):
             num_images_to_fp += int(em.example.forward_select)
             if num_images_to_fp == self.forward_batch_size:
                 # Note: includes item that should and shouldn't be forward propped
-                forward_batch = self.forward_queue[:index+1]
-                self.forward_queue = self.forward_queue[index+1:]
+                forward_batch = self.forward_queue[: index + 1]
+                self.forward_queue = self.forward_queue[index + 1 :]
                 return forward_batch
         if final or len(self.forward_queue) > max_queue_size:
             forward_batch = self.forward_queue
@@ -254,26 +272,31 @@ class MemoizedTrainer(Trainer):
             return forward_batch
         return None
 
-class NoFilterTrainer(Trainer):
-    def __init__(self,
-                 device,
-                 net,
-                 backpropper,
-                 batch_size,
-                 loss_fn,
-                 max_num_backprops=float('inf'),
-                 lr_schedule=None,
-                 forwardlr=False):
 
-        super(NoFilterTrainer, self).__init__(device,
-                                net,
-                                None,
-                                backpropper,
-                                batch_size,
-                                loss_fn,
-                                max_num_backprops,
-                                lr_schedule,
-                                forwardlr)
+class NoFilterTrainer(Trainer):
+    def __init__(
+        self,
+        device,
+        net,
+        backpropper,
+        batch_size,
+        loss_fn,
+        max_num_backprops=float("inf"),
+        lr_schedule=None,
+        forwardlr=False,
+    ):
+
+        super(NoFilterTrainer, self).__init__(
+            device,
+            net,
+            None,
+            backpropper,
+            batch_size,
+            loss_fn,
+            max_num_backprops,
+            lr_schedule,
+            forwardlr,
+        )
 
     def train_batch(self, batch, final):
         annotated_forward_batch = self.create_example_batch(*batch)
@@ -283,4 +306,3 @@ class NoFilterTrainer(Trainer):
             annotated_backward_batch = self.backpropper.backward_pass(backprop_batch)
             self.emit_backward_pass(annotated_backward_batch)
             self.emit_forward_pass(annotated_backward_batch)
-

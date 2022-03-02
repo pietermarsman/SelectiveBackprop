@@ -1,9 +1,8 @@
-
 import torch
 import torch.nn as nn
 
-class CutoutForwardpropper(object):
 
+class CutoutForwardpropper(object):
     def __init__(self, device, net, loss_fn):
         self.net = net
         self.device = device
@@ -47,9 +46,7 @@ class CutoutForwardpropper(object):
             _, predicted = outputs.max(1)
             is_corrects = predicted.eq(targets)
 
-            for em, loss, is_correct in zip(selected_examples,
-                                            losses,
-                                            is_corrects):
+            for em, loss, is_correct in zip(selected_examples, losses, is_corrects):
 
                 em.example.loss = loss.item()
                 em.example.correct = is_correct.item()
@@ -58,8 +55,8 @@ class CutoutForwardpropper(object):
 
         return batch
 
-class BaselineForwardpropper(object):
 
+class BaselineForwardpropper(object):
     def __init__(self, device, net, dataset, optimizer, loss_fn):
         self.optimizer = optimizer
         self.net = net
@@ -76,21 +73,26 @@ class BaselineForwardpropper(object):
         return torch.stack(chosen_data)
 
     def _get_chosen_targets_tensor(self, batch):
-        chosen_targets = [example.target for example in batch if example.get_select(True)]
+        chosen_targets = [
+            example.target for example in batch if example.get_select(True)
+        ]
         chosen = len([example.target for example in batch if example.get_select(True)])
         whole = len(batch)
         return torch.stack(chosen_targets)
 
     def count_allocated_tensors(self):
         import gc
+
         count = 0
         for obj in gc.get_objects():
             try:
-                if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
-                    #print(type(obj), obj.size())
+                if torch.is_tensor(obj) or (
+                    hasattr(obj, "data") and torch.is_tensor(obj.data)
+                ):
+                    # print(type(obj), obj.size())
                     count += 1
             except:
-                pass 
+                pass
         return count
 
     def forward_pass(self, batch):
@@ -112,11 +114,9 @@ class BaselineForwardpropper(object):
         is_corrects = predicted.eq(targets)
 
         examples = []
-        for image_id, loss, output, softmax_output, is_correct in zip(image_ids,
-                                                                      losses,
-                                                                      outputs,
-                                                                      softmax_outputs,
-                                                                      is_corrects):
+        for image_id, loss, output, softmax_output, is_correct in zip(
+            image_ids, losses, outputs, softmax_outputs, is_corrects
+        ):
             # TODO: FIX BUG. DATUM IS NOT GETTING UPDATED?
             e = self.dataset.examples[image_id]
             e.loss = loss

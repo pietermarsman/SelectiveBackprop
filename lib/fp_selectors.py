@@ -11,10 +11,9 @@ def get_selector(selector_type, num_images_to_prime, staleness=2):
     else:
         print("FP Selector must be in {alwayson, threshold}")
         exit()
-    selector = PrimedSelector(AlwaysOnSelector(),
-                              final_selector,
-                              num_images_to_prime)
+    selector = PrimedSelector(AlwaysOnSelector(), final_selector, num_images_to_prime)
     return selector
+
 
 class PrimedSelector(object):
     def __init__(self, initial, final, initial_num_images, epoch=0):
@@ -27,7 +26,9 @@ class PrimedSelector(object):
         self.num_trained += partition_size
 
     def get_selector(self):
-        return self.initial if self.num_trained < self.initial_num_images else self.final
+        return (
+            self.initial if self.num_trained < self.initial_num_images else self.final
+        )
 
     def select(self, *args, **kwargs):
         return self.get_selector().select(*args, **kwargs)
@@ -36,38 +37,43 @@ class PrimedSelector(object):
         return self.get_selector().mark(*args, **kwargs)
 
 
-class AlwaysOnSelector():
+class AlwaysOnSelector:
     def mark(self, examples_and_metadata):
         for em in examples_and_metadata:
-            em.example.forward_select_probability = 1.
+            em.example.forward_select_probability = 1.0
             em.example.forward_select = True
         return examples_and_metadata
 
-class StaleSelector():
+
+class StaleSelector:
     def __init__(self, threshold):
         self.threshold = threshold
         self.logger = {"counter": 0, "forward": 0, "no_forward": 0}
 
     def select(self, em):
-        #if self.logger['counter'] % 50000 == 0:
+        # if self.logger['counter'] % 50000 == 0:
         #    print(self.logger)
-        self.logger['counter'] += 1
+        self.logger["counter"] += 1
 
         em.metadata["epochs_since_update"] += 1
-        if 'loss' not in em.metadata or em.metadata["epochs_since_update"] >= self.threshold:
-            self.logger['forward'] += 1
+        if (
+            "loss" not in em.metadata
+            or em.metadata["epochs_since_update"] >= self.threshold
+        ):
+            self.logger["forward"] += 1
             return True
         else:
-            self.logger['no_forward'] += 1
+            self.logger["no_forward"] += 1
             em.example.loss = em.metadata["loss"]
             return False
 
     def mark(self, examples_and_metadata):
-        for em in examples_and_metadata: 
+        for em in examples_and_metadata:
             em.example.forward_select = self.select(em)
         return examples_and_metadata
 
-'''
+
+"""
 class ThresholdSelector():
     def __init__(self):
         self.logger = {"counter": 0, "path_3": 0, "path_2": 0, "path_1": 0}
@@ -111,4 +117,4 @@ class ThresholdSelector():
         for example in examples:
             example.forward_select = self.select(example)
         return examples
-'''
+"""
