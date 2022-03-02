@@ -1,11 +1,13 @@
+import time
+
+import torch
+import torch.nn as nn
+
 from . import backproppers
 from . import calculators
 from . import fp_selectors
 from . import loggers
 from . import selectors
-import time
-import torch
-import torch.nn as nn
 from . import trainer as trainer
 
 start_time_seconds = time.time()

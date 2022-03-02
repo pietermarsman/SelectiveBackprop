@@ -4,21 +4,16 @@
 
 import argparse
 import os
-import pdb
 import sys
 import time
-import numpy as np
-from tqdm import tqdm
 from os.path import dirname, abspath
 
+import numpy as np
 import torch
-import torch.nn as nn
-from torch.autograd import Variable
 import torch.backends.cudnn as cudnn
+import torch.nn as nn
 from torch.optim.lr_scheduler import MultiStepLR
-
-from torchvision.utils import make_grid
-from torchvision import datasets, transforms
+from torchvision import transforms
 
 parent_dir = dirname(dirname(abspath(__file__)))
 sys.path.insert(0, parent_dir)
@@ -28,7 +23,6 @@ from model.wide_resnet import WideResNet
 
 from lib.SelectiveBackpropper import SelectiveBackpropper
 import lib.cifar
-import lib.datasets
 import lib.svhn
 from lib.cutout import Cutout
 

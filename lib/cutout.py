@@ -9,8 +9,8 @@ section 3 to be specific to the needs of the education communities using this
 license.
 """
 
-import torch
 import numpy as np
+import torch
 
 
 class Cutout(object):

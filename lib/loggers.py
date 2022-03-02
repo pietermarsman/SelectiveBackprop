@@ -1,12 +1,9 @@
-import numpy as np
-import pickle
 import os
+import pickle
 import time
-import torch
-import torch.nn as nn
+
+import numpy as np
 import torchvision
-import torchvision.transforms as transforms
-from PIL import Image
 
 
 class ImageWriter(object):

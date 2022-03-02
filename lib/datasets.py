@@ -2,11 +2,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision
 import torchvision.transforms as transforms
+from PIL import ImageFile
+
 import lib.cifar
 import lib.mnist
-from PIL import ImageFile
 
 
 def get_batches(iterable, n=1):
@@ -135,7 +135,6 @@ class CIFAR10(Dataset):
 
 class MNIST(Dataset):
     def __init__(self, device, split_size, test_batch_size):
-
         super(MNIST, self).__init__(split_size)
 
         self.model = MNISTNet().to(device)
@@ -283,7 +282,6 @@ class IndexedImageFolder(datasets.ImageFolder):
 
 class ImageNet(Dataset):
     def __init__(self, model, test_batch_size, traindir, valdir, split_size):
-
         super(ImageNet, self).__init__(split_size)
 
         ImageFile.LOAD_TRUNCATED_IMAGES = True

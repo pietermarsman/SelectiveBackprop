@@ -1,9 +1,6 @@
 import json
-import numpy as np
-import torch
-import torch.nn as nn
+
 from . import forwardproppers
-from . import sb_util
 
 
 class ExampleAndMetadata(object):
@@ -285,7 +282,6 @@ class NoFilterTrainer(Trainer):
         lr_schedule=None,
         forwardlr=False,
     ):
-
         super(NoFilterTrainer, self).__init__(
             device,
             net,

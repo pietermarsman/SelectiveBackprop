@@ -1,12 +1,12 @@
-from scipy import stats
 import collections
 import math
+
 import numpy as np
 import torch
-import torch.nn as nn
-from random import shuffle
-import lib.predictors
+
 import lib.hist
+import lib.predictors
+
 
 # TODO: Transform into base classes
 def get_probability_calculator(

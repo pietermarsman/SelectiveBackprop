@@ -27,9 +27,6 @@ class CutoutForwardpropper(object):
         selected_examples = self._get_chosen_examples(batch)
 
         if len(selected_examples) > 0:
-            image_ids = self._get_chosen_image_ids(selected_examples)
-            data = self._get_chosen_data_tensor(selected_examples)
-            targets = self._get_chosen_targets_tensor(selected_examples)
 
             data = self._get_chosen_data_tensor(batch).to(self.device)
             targets = self._get_chosen_targets_tensor(batch).to(self.device)
@@ -41,13 +38,11 @@ class CutoutForwardpropper(object):
                 outputs = self.net(data)
 
             losses = self.loss_fn(reduce=False)(outputs, targets)
-            softmax_outputs = nn.Softmax()(outputs)
 
             _, predicted = outputs.max(1)
             is_corrects = predicted.eq(targets)
 
             for em, loss, is_correct in zip(selected_examples, losses, is_corrects):
-
                 em.example.loss = loss.item()
                 em.example.correct = is_correct.item()
                 em.metadata["epochs_since_update"] = 0

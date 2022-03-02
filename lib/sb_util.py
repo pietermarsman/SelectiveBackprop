@@ -1,5 +1,6 @@
-import torch
 import random
+
+import torch
 
 
 def print_random_points_in_tensor_unroll1(tensor):

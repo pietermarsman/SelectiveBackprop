@@ -1,9 +1,8 @@
 ## Accelerating Deep Learning by Focusing on the Biggest Losers
 
-SelectiveBackprop accelerates training by dynamically prioritizing useful
-examples with high loss. SelectiveBackprop can reduce training time by up to
-3.5x faster than standard training with SGD. [Our
-paper](https://arxiv.org/abs/1910.00762) describes the system in detail.
+SelectiveBackprop accelerates training by dynamically prioritizing useful examples with high loss. SelectiveBackprop can
+reduce training time by up to 3.5x faster than standard training with SGD. [Our paper](https://arxiv.org/abs/1910.00762)
+describes the system in detail.
 
 ## Prerequisites
 
@@ -15,6 +14,7 @@ paper](https://arxiv.org/abs/1910.00762) describes the system in detail.
 ## Example Commands
 
 ### Train using SelectiveBackprop
+
 ```
 $ python examples/train.py --strategy sb --dataset <cifar10|cifar100|svhn>
 
@@ -39,14 +39,15 @@ Time elapsed: 57.07s
 ```
 
 ### Train using SelectiveBackprop with staleness
+
 ```
 $ python examples/train.py --strategy sb --dataset <cifar10|cifar100|svhn> --fp_selector stale
 ```
 
 ## Example Usage
 
-To use SelectiveBackprop with your own PyTorch training code, first create a
-SelctiveBackpropper object and call train with a typical PyTorch dataloader.
+To use SelectiveBackprop with your own PyTorch training code, first create a SelctiveBackpropper object and call train
+with a typical PyTorch dataloader.
 
 ```python
 '''

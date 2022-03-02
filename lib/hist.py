@@ -50,9 +50,7 @@ class UnboundedHistogram:
 
 
 def test():
-
     import datetime
-    import timeit
     import random
 
     def get_epochtime_us():

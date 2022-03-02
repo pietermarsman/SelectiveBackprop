@@ -1,12 +1,15 @@
 from __future__ import print_function
-import torch.utils.data as data
-from PIL import Image
+
+import codecs
+import gzip
 import os
 import os.path
-import gzip
+
 import numpy as np
 import torch
-import codecs
+import torch.utils.data as data
+from PIL import Image
+
 from .utils import download_url, makedir_exist_ok
 
 

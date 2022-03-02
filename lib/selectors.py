@@ -1,10 +1,8 @@
-from scipy import stats
-import collections
-import math
+from random import shuffle
+
 import numpy as np
 import torch
-import torch.nn as nn
-from random import shuffle
+
 
 # TODO: Transform into base classes
 def get_selector(

@@ -1,5 +1,3 @@
-import numpy as np
-
 # TODO: Transform into base classes
 def get_selector(selector_type, num_images_to_prime, staleness=2):
     if selector_type == "threshold":
